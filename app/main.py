@@ -1,31 +1,31 @@
 import logging
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from app.database import engine, Base
+from app.database import engine, Base, init_tables
 from app.errors import ApiError
-import os
 from fastapi.staticfiles import StaticFiles
 from app.routers import auth, groups, expenses, settlements
 import app.models  # Register models
 
 logger = logging.getLogger("halfway")
 
-# Ensure tables are created on startup
+# Pre-initialize tables on import if possible
 try:
-    Base.metadata.create_all(bind=engine)
+    init_tables()
 except Exception as e:
-    logger.warning("Could not create tables at startup: %s", e)
+    logger.warning("Startup table creation skipped: %s", e)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
-        Base.metadata.create_all(bind=engine)
+        init_tables()
     except Exception as e:
-        logger.warning("Could not create tables in lifespan: %s", e)
+        logger.warning("Lifespan table creation skipped: %s", e)
     yield
 
 
@@ -103,40 +103,40 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
         content={
             "error": {
                 "code": "server_error",
-                "message": "Something went wrong on our side. Try again in a moment.",
+                "message": f"Server error: {type(exc).__name__}: {str(exc)}",
             }
         },
     )
 
 
-# Routers
+# Health check endpoints
+@app.get("/health")
+@app.get("/api/health")
+def health():
+    """Check app and database health."""
+    try:
+        from sqlalchemy import text
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return {"status": "ok", "database": "connected"}
+    except Exception as e:
+        return {"status": "error", "database": f"{type(e).__name__}: {str(e)}"}
+
+
+# Register API routers with /api prefix
 app.include_router(auth.router, prefix="/api")
 app.include_router(groups.router, prefix="/api")
 app.include_router(expenses.router, prefix="/api")
 app.include_router(settlements.router, prefix="/api")
 
-
-@app.api_route(
-    "/api/{full_path:path}",
-    methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
-)
-def api_not_found(full_path: str):
-    raise ApiError(404, "not_found", "Resource does not exist")
+# Also register without /api prefix in case URL rewrite strips /api
+app.include_router(auth.router)
+app.include_router(groups.router)
+app.include_router(expenses.router)
+app.include_router(settlements.router)
 
 
-# Mount static files LAST (skip on Vercel — static files served separately)
-frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
+# Mount static frontend files if directory exists locally
+frontend_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend")
 if os.path.isdir(frontend_dir):
     app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
-
-
-@app.get("/api/health")
-def health():
-    """Check app and database health."""
-    from app.database import engine
-    try:
-        with engine.connect() as conn:
-            conn.execute(__import__('sqlalchemy').text("SELECT 1"))
-        return {"status": "ok", "database": "connected"}
-    except Exception as e:
-        return {"status": "error", "database": str(e)}

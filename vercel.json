@@ -1,7 +1,6 @@
 {
   "builds": [
-    { "src": "api/index.py", "use": "@vercel/python" },
-    { "src": "frontend/**", "use": "@vercel/static" }
+    { "src": "api/index.py", "use": "@vercel/python" }
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "api/index.py" },
@@ -9,7 +8,10 @@
     { "src": "/js/(.*)", "dest": "frontend/js/$1" },
     { "src": "/(.*\\.html)", "dest": "frontend/$1" },
     { "src": "/(.*\\.ico)", "dest": "frontend/$1" },
+    { "src": "/(.*\\.png)", "dest": "frontend/$1" },
+    { "src": "/(.*\\.jpg)", "dest": "frontend/$1" },
     { "src": "^/$", "dest": "frontend/index.html" },
     { "src": "/(.*)", "dest": "frontend/index.html" }
-  ]
+  ],
+  "outputDirectory": "."
 }
