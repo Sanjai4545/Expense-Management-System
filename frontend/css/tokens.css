@@ -1,0 +1,46 @@
+:root {
+  /* color */
+  --lagoon: #0E6F7E;       /* primary actions, links, focus ring */
+  --lagoon-deep: #0A4F5A;  /* primary hover/pressed */
+  --lagoon-wash: #E3F1F3;  /* selected states, subtle fills */
+  --mist: #F2F5F9;         /* page background */
+  --paper: #FFFFFF;        /* cards, inputs */
+  --ink: #17212F;          /* main text */
+  --slate: #5B6878;        /* secondary text (5.7:1 on white) */
+  --line: #E1E7EF;         /* borders and dividers */
+  --leaf: #187A50;         /* "you are owed" (5.3:1 on white) */
+  --leaf-wash: #E4F4EC;
+  --coral: #C2362A;        /* "you owe", errors (5.4:1 on white) */
+  --coral-wash: #FBE9E7;
+  --mango: #F4A62A;        /* the one warm accent: record-payment button, highlight */
+  --mango-deep: #DB8E12;   /* mango hover */
+
+  /* type */
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Figtree", "Segoe UI", system-ui, sans-serif;
+  --fs-sm: 0.875rem;
+  --fs-base: 1rem;
+  --fs-md: 1.125rem;
+  --fs-lg: 1.375rem;
+  --fs-xl: 1.75rem;
+  --fs-2xl: 2.25rem;
+  --lh-body: 1.55;
+  --lh-tight: 1.2;
+
+  /* shape: radii differ by role on purpose */
+  --r-control: 12px;       /* inputs, buttons */
+  --r-card: 20px;          /* cards, dialogs */
+  --r-pill: 999px;         /* avatars, chips, segmented control */
+
+  /* spacing scale */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 48px;
+
+  /* elevation: one soft layered shadow, used only on dialogs and the settle-up card */
+  --shadow: 0 1px 2px rgba(23, 33, 47, 0.06), 0 8px 24px rgba(23, 33, 47, 0.08);
+}
