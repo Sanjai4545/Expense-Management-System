@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.database import engine, Base
 from app.errors import ApiError
+import os
 from fastapi.staticfiles import StaticFiles
 from app.routers import auth, groups, expenses, settlements
 import app.models  # Register models
@@ -117,8 +118,10 @@ def api_not_found(full_path: str):
     raise ApiError(404, "not_found", "Resource does not exist")
 
 
-# Mount static files LAST
-app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
+# Mount static files LAST (skip on Vercel — static files served separately)
+frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
+if os.path.isdir(frontend_dir):
+    app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
 
 
 @app.get("/api/health")
