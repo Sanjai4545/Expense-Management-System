@@ -6,6 +6,10 @@
       "config": {
         "includeFiles": ["app/**"]
       }
+    },
+    {
+      "src": "frontend/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -16,7 +20,6 @@
     { "src": "/(.*\\.ico)", "dest": "frontend/$1" },
     { "src": "/(.*\\.png)", "dest": "frontend/$1" },
     { "src": "/(.*\\.jpg)", "dest": "frontend/$1" },
-    { "src": "^/$", "dest": "frontend/index.html" },
     { "src": "/(.*)", "dest": "frontend/index.html" }
   ]
 }
