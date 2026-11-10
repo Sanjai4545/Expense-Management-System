@@ -14,12 +14,18 @@ import app.models  # Register models
 logger = logging.getLogger("halfway")
 
 # Ensure tables are created on startup
-Base.metadata.create_all(bind=engine)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    logger.warning("Could not create tables at startup: %s", e)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Base.metadata.create_all(bind=engine)
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        logger.warning("Could not create tables in lifespan: %s", e)
     yield
 
 

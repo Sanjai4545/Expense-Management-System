@@ -6,8 +6,6 @@ from app.config import DATABASE_URL
 connect_args = {}
 if "sqlite" in DATABASE_URL:
     connect_args = {"check_same_thread": False}
-elif "postgresql" in DATABASE_URL:
-    connect_args = {"sslmode": "require"}
 
 engine = create_engine(DATABASE_URL, connect_args=connect_args, pool_pre_ping=True)
 
