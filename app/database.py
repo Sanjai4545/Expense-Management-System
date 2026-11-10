@@ -2,21 +2,27 @@ import logging
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from sqlalchemy.pool import NullPool
 from app.config import DATABASE_URL
 
 logger = logging.getLogger("halfway")
 
 connect_args = {}
+engine_kwargs = {}
+
 if "sqlite" in DATABASE_URL:
-    connect_args = {"check_same_thread": False}
-elif "postgresql" in DATABASE_URL and "sslmode" not in DATABASE_URL:
-    connect_args = {"sslmode": "require"}
+    connect_args["check_same_thread"] = False
+elif "postgresql" in DATABASE_URL:
+    # On serverless (Vercel) connecting to Neon's PgBouncer pooler,
+    # NullPool is required to prevent frozen/broken connection reuse
+    engine_kwargs["poolclass"] = NullPool
+    if "sslmode" not in DATABASE_URL:
+        connect_args["sslmode"] = "require"
 
 engine = create_engine(
     DATABASE_URL,
     connect_args=connect_args,
-    pool_pre_ping=True,
-    pool_recycle=300,
+    **engine_kwargs
 )
 
 if "sqlite" in DATABASE_URL:
@@ -35,7 +41,7 @@ class Base(DeclarativeBase):
 _tables_initialized = False
 
 def init_tables():
-    """Ensure database tables exist (runs once per serverless worker)."""
+    """Ensure database tables exist on Neon PostgreSQL."""
     global _tables_initialized
     if not _tables_initialized:
         try:
@@ -44,7 +50,8 @@ def init_tables():
             _tables_initialized = True
             logger.info("Database tables initialized successfully.")
         except Exception as e:
-            logger.warning("Table initialization error (may retry): %s", e)
+            logger.error("Failed to create tables: %s", e)
+            raise e
 
 def get_db():
     init_tables()

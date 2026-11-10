@@ -1,6 +1,12 @@
 {
   "builds": [
-    { "src": "api/index.py", "use": "@vercel/python" }
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python",
+      "config": {
+        "includeFiles": ["app/**"]
+      }
+    }
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "api/index.py" },
@@ -12,6 +18,5 @@
     { "src": "/(.*\\.jpg)", "dest": "frontend/$1" },
     { "src": "^/$", "dest": "frontend/index.html" },
     { "src": "/(.*)", "dest": "frontend/index.html" }
-  ],
-  "outputDirectory": "."
+  ]
 }
