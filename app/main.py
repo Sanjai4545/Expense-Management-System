@@ -132,4 +132,11 @@ if os.path.isdir(frontend_dir):
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok"}
+    """Check app and database health."""
+    from app.database import engine
+    try:
+        with engine.connect() as conn:
+            conn.execute(__import__('sqlalchemy').text("SELECT 1"))
+        return {"status": "ok", "database": "connected"}
+    except Exception as e:
+        return {"status": "error", "database": str(e)}
