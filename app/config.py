@@ -14,3 +14,7 @@ if not SECRET_KEY:
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./halfway.db").strip()
 if not DATABASE_URL:
     DATABASE_URL = "sqlite:///./halfway.db"
+
+# Fix for Neon/Supabase: postgres:// -> postgresql://
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
